@@ -6,6 +6,10 @@ import { Plus, FileText, Calendar, Activity } from "lucide-react";
 import { ProcedureForm } from "@/components/ProcedureForm";
 import { ProceduresList } from "@/components/ProceduresList";
 import { StatsCard } from "@/components/StatsCard";
+import WL from "@/assets/WL.png";
+import WL2 from "@/assets/WL2.png";
+import WL3 from "@/assets/WL3.png";
+import WL4 from "@/assets/WL4.png";
 
 export interface Procedure {
   id: string;
@@ -35,7 +39,7 @@ const Index = () => {
       findings: "Normal gastric mucosa, no significant pathology detected",
       duration: "25 minutes",
       anesthesia: "Conscious Sedation",
-      images: []
+      images: [WL, WL2]
     },
     {
       id: "2",
@@ -48,7 +52,7 @@ const Index = () => {
       complications: "None",
       duration: "35 minutes",
       anesthesia: "General Anesthesia",
-      images: []
+      images: [WL3, WL4]
     }
   ]);
 
