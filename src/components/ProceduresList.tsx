@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Search, Trash2, Calendar, User, Clock, FileText, FileDown, ChevronRight } from "lucide-react";
+import { Search, Trash2, Calendar, User, Clock, FileText, ChevronRight } from "lucide-react";
 import { Procedure } from "@/pages/Index";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
@@ -54,7 +54,15 @@ export const ProceduresList = ({ procedures, onDelete, onCreateReport }: Procedu
       ) : (
         <div className="space-y-3">
           {filteredProcedures.map((procedure) => (
-            <Card key={procedure.id} className="p-4 hover:shadow-md transition-all">
+            <Card 
+              key={procedure.id} 
+              className="p-4 hover:shadow-lg transition-all cursor-pointer hover:border-primary/50 relative group"
+              onClick={(e) => {
+                if (!(e.target as HTMLElement).closest('button')) {
+                  onCreateReport(procedure);
+                }
+              }}
+            >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 space-y-3">
                   <div className="flex items-start justify-between">
@@ -126,19 +134,15 @@ export const ProceduresList = ({ procedures, onDelete, onCreateReport }: Procedu
                   )}
                 </div>
 
-                <div className="flex flex-col gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => onCreateReport(procedure)}
-                    className="gap-2"
-                  >
-                    <FileDown className="w-4 h-4" />
-                    Create Report
-                  </Button>
+                <div className="flex items-center gap-2">
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="text-muted-foreground hover:text-destructive"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </AlertDialogTrigger>
