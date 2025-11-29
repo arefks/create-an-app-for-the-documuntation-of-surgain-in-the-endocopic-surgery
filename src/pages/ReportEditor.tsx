@@ -256,9 +256,14 @@ function SurgicalReportPage({ procedure }: { procedure?: Procedure | undefined }
         <div style={{ marginTop: 12 }}>
           {/* colon image and action buttons above the image grid */}
           <div style={{ marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div>
-              <img src="/colon.png" alt="colon" style={{ width: 120 }} />
-            </div>
+              <div>
+                {/* show colon_1.png when no images selected, colon_2.png when images are present */}
+                <img
+                  src={images && images.length > 0 ? '/colon_2.png' : '/colon_1.png'}
+                  alt="colon"
+                  style={{ width: 180, marginLeft: 20, marginRight: 8 }}
+                />
+              </div>
             <div style={{ display: 'flex', gap: 8 }}>
               <button
                 onClick={() => {

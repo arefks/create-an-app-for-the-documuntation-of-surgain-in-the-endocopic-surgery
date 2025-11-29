@@ -104,7 +104,7 @@ const Index = () => {
   duration: "30 minutes",
   anesthesia: "Conscious Sedation",
   recommendations: "Polyp retrieved and sent for histologic analysis. Recommend surgical consultation regarding Meckel diverticulum given ongoing bleeding risk; consider cross-sectional imaging (CT enterography) if bleeding recurs. Initiate iron supplementation and outpatient follow-up in 2 weeks.",
-  images: [IMG1, IMG2, IMG3, WL3, WL4, WL55, WL56, WL57, WL58, WL59, WL65, WL66, WL67, WL68, WL69]
+  images: [WL3, WL4, WL55, IMG3, WL56, WL58, WL59, WL65, WL66, WL67, IMG1, IMG2, WL68, WL69]
   ,
   imageNotes: imageNotes2
     }
