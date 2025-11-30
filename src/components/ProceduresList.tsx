@@ -330,6 +330,8 @@ export const ProceduresList = ({ procedures, onDelete, onCreateReport }: Procedu
                         try {
                           // remove persisted selection so the report won't auto-include images
                           localStorage.removeItem(`selectedImages_${procedure.id}`);
+                          // also remove any persisted image notes for this procedure so reset returns to first state
+                          try { localStorage.removeItem(`imageNotes_${procedure.id}`); } catch (e) {}
                         } catch (err) {
                           // fallback: save an explicit empty selection array
                           try { saveSelectedToStorage(procedure.id, (procedure.images || []).map(() => false), procedure.images || []); } catch {}

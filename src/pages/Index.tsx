@@ -39,6 +39,7 @@ export interface Procedure {
   id: string;
   patientName: string;
   patientId: string;
+  dob?: string;
   date: string;
   procedureType: string;
   surgeon: string;
@@ -67,6 +68,7 @@ const Index = () => {
       id: "1",
       patientName: "John Doe",
       patientId: "P-2024-001",
+      dob: "1967-04-20",
       date: "2024-01-15",
       procedureType: "Diagnostic Gastroscopy",
       surgeon: "Dr. Holota",
@@ -88,11 +90,12 @@ const Index = () => {
       id: "2",
       patientName: "Jane Smith",
       patientId: "P-2024-002",
+      dob: "1957-07-03",
       date: "2024-01-16",
       procedureType: "Colonoscopy",
       surgeon: "Dr. Holota",
       referringPhysician: "Dr. Kalantari",
-      age: "46",
+      age: "68",
       sex: "Female",
       medications: "12.5 mg Midazolam; 400 mg Propofol",
       indication: "Abdominal pain, melena, constipation",
