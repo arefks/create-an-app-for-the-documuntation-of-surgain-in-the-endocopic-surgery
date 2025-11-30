@@ -18,6 +18,17 @@
   </head>
 
   <body>
+    <section>
+      <h2>Dev vs Production</h2>
+      <p><code>npm run dev</code> starts a local Vite server (hot reload on localhost). GitHub Pages serves only the static production build from <code>dist/</code>.</p>
+      <ol>
+        <li>Run <code>npm install</code> (first time).</li>
+        <li>Run <code>npm run dev</code> for localhost development.</li>
+        <li>Run <code>npm run build</code> to generate <code>dist</code>.</li>
+        <li>Deploy: commit <code>dist</code> (or use a workflow) so Pages serves the built files.</li>
+      </ol>
+    </section>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
