@@ -35,6 +35,7 @@ export default function ReportEditor() {
 
 function SurgicalReportPage({ procedure }: { procedure?: Procedure | undefined }) {
   const reportRef = useRef<HTMLDivElement | null>(null);
+  const location = useLocation();
 
   // Patient / procedure fields
   const [patientName, setPatientName] = useState("");
@@ -100,19 +101,25 @@ function SurgicalReportPage({ procedure }: { procedure?: Procedure | undefined }
     if (procedure) {
       setPatientName(procedure.patientName || "");
       setPatientId(procedure.patientId || "");
+      setDob((procedure as any).dob || procedure.dob || "");
       if (procedure.date) setProcedureDateTime(new Date(procedure.date).toLocaleString());
   setPhysician(procedure.surgeon || "");
   setReferringPhysician((procedure as any).referringPhysician || procedure.referringPhysician || "");
   setExamType(procedure.procedureType || "");
   setExtentOfExam((procedure as any).extent || (procedure as any).extentOfExam || procedure.extentOfExam || "Cecum");
-  setFindings(procedure.findings || "");
-  setComplications(procedure.complications || "");
-  // map additional textual fields from Procedure
-  setDescription((procedure as any).description || procedure.description || "");
-  setDiagnosis((procedure as any).diagnosis || procedure.diagnosis || "");
-  setRecommendations((procedure as any).recommendations || procedure.recommendations || "");
-  setMedications((procedure as any).medications || procedure.medications || "");
-  setIndications((procedure as any).indication || procedure.indication || "");
+    // Set initial values: keep medication/indication empty at start (they will be filled by TTS)
+    setMedications("");
+    setIndications("");
+    // Description: provide a basic colonoscopy procedure boilerplate if none provided.
+    const defaultDesc = "Colonoscopy performed under conscious sedation. The colonoscope was advanced to the cecum with careful inspection of the mucosa during withdrawal. No immediate complications observed during the procedure.";
+    // Always show the template description on open; do NOT prefill with procedure.description until TTS is pressed.
+    setDescription(defaultDesc);
+    // Complications: default to 'None' when not provided
+    setComplications("None");
+    // Leave findings, diagnosis, recommendations empty initially per request
+    setFindings("");
+    setDiagnosis("");
+    setRecommendations("");
   setAge((procedure as any).age || procedure.age || "");
   setGender((procedure as any).sex || procedure.sex || "");
       // If the navigation provided selectedImages, use those. If not, try reading a persisted
@@ -153,16 +160,41 @@ function SurgicalReportPage({ procedure }: { procedure?: Procedure | undefined }
   // initialize per-image notes array whenever images change (keep existing notes where possible)
   // Prefer notes attached to the procedure (loaded from JSON at insertion time) when available.
   useEffect(() => {
-    // initialize notes to empty strings for selected images; do NOT prefill from JSON here.
+    // initialize notes to empty strings for selected images; do NOT prefill from procedure JSON here.
+    // However, if there is a persisted user-edited notes array, restore that so edits survive navigation.
     const count = 6;
+    try {
+      const key = `imageNotes_${procedure?.id}`;
+      const stored = procedure?.id ? localStorage.getItem(key) : null;
+      if (stored) {
+        const parsed = JSON.parse(stored) as string[];
+        if (Array.isArray(parsed)) {
+          // ensure length 6
+          const arr = parsed.slice(0, 6);
+          while (arr.length < 6) arr.push('');
+          setImageNotes(arr);
+          return;
+        }
+      }
+    } catch (err) {
+      // ignore
+    }
+
     setImageNotes(() => {
-      const next = Array.from({ length: count }).map((_, i) => {
-        // if an image is present for this slot, leave its note blank; otherwise blank too
-        return '';
-      });
+      const next = Array.from({ length: count }).map((_, i) => '');
       return next;
     });
   }, [images]);
+
+  // Persist image notes to localStorage whenever they change so reset can clear them and edits survive navigation
+  useEffect(() => {
+    try {
+      if (!procedure?.id) return;
+      localStorage.setItem(`imageNotes_${procedure.id}`, JSON.stringify(imageNotes || []));
+    } catch (err) {
+      // ignore
+    }
+  }, [imageNotes, procedure]);
 
   // Helper: generate a short 1-3 word label for an image (heuristic)
   const generateShortLabel = (src?: string, idx?: number) => {
@@ -264,7 +296,7 @@ function SurgicalReportPage({ procedure }: { procedure?: Procedure | undefined }
                   style={{ width: 180, marginLeft: 20, marginRight: 8 }}
                 />
               </div>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'flex-end' }}>
               <button
                 onClick={() => {
                   // TTS-like auto-fill: prefer descriptions from the procedure's imageNotes map (if present).
@@ -278,7 +310,7 @@ function SurgicalReportPage({ procedure }: { procedure?: Procedure | undefined }
                       // attempt to look up a description from procedure.imageNotes (mapping)
                       let found = '';
                       try {
-                        const map = (procedure as any)?.imageNotes as Record<string, string> | undefined;
+                        const map = (procedure as any)?.imageNotes as Record<string, any> | undefined;
                         if (map) {
                           const src = img.src || '';
                           const parts = src.split('/');
@@ -288,7 +320,8 @@ function SurgicalReportPage({ procedure }: { procedure?: Procedure | undefined }
                           const tries = [basename, basename.toLowerCase(), nameNoExt, nameNoExt.toLowerCase()];
                           for (const k of tries) {
                             if (map[k]) {
-                              found = map[k];
+                              const v = map[k];
+                              found = typeof v === 'string' ? v : (v.desc || '');
                               break;
                             }
                           }
@@ -297,7 +330,8 @@ function SurgicalReportPage({ procedure }: { procedure?: Procedure | undefined }
                             for (const key of Object.keys(map)) {
                               if (!key) continue;
                               if (src.toLowerCase().includes(key.toLowerCase())) {
-                                found = map[key];
+                                const v = map[key];
+                                found = typeof v === 'string' ? v : (v.desc || '');
                                 break;
                               }
                             }
@@ -308,43 +342,116 @@ function SurgicalReportPage({ procedure }: { procedure?: Procedure | undefined }
                       }
 
                       if (found) {
-                        next[i] = found;
+                        // append to existing note rather than overwriting
+                        const existing = next[i] || '';
+                        next[i] = existing ? `${existing} ${found}` : found;
                         continue;
                       }
 
-                      // fallback to heuristic generation
+                      // fallback to heuristic generation (append)
                       const label = generateShortLabel(img?.src, i + 1);
-                      next[i] = generateFittingDescription(img?.src, i + 1, label);
+                      const gen = generateFittingDescription(img?.src, i + 1, label);
+                      const existing = next[i] || '';
+                      next[i] = existing ? `${existing} ${gen}` : gen;
                     }
                     return next;
                   });
+
+                  // fill narrative text fields when TTS is pressed
+                  try {
+                    // prefer procedure-provided text when available
+                    const procDesc = (procedure as any)?.description || procedure?.description || '';
+                    const procFind = (procedure as any)?.findings || procedure?.findings || '';
+                    const procDiag = (procedure as any)?.diagnosis || procedure?.diagnosis || '';
+                    const procRec = (procedure as any)?.recommendations || procedure?.recommendations || '';
+                    const procComp = (procedure as any)?.complications || procedure?.complications || '';
+
+                    if (procDesc && procDesc.trim().length > 0) setDescription(procDesc);
+                    else {
+                      // fallback: derive from first image if present
+                      const img0 = images && images[0];
+                      if (img0) setDescription(generateFittingDescription(img0.src, 1, generateShortLabel(img0.src, 1)));
+                    }
+
+                    if (procFind && procFind.trim().length > 0) setFindings(procFind);
+                    else setFindings('No significant pathology observed in the selected images.');
+
+                    if (procDiag && procDiag.trim().length > 0) setDiagnosis(procDiag);
+                    else setDiagnosis('No definitive diagnosis based on selected images alone.');
+
+                    if (procRec && procRec.trim().length > 0) setRecommendations(procRec);
+                    else setRecommendations('Routine follow-up recommended as clinically indicated.');
+
+                    if (procComp && procComp.trim().length > 0) setComplications(procComp);
+                    else setComplications('');
+                    // Fill medications from procedure when TTS is pressed
+                    const procMed = (procedure as any)?.medications || procedure?.medications || '';
+                    if (procMed && procMed.trim().length > 0) setMedications(procMed);
+                  } catch (err) {
+                    // ignore
+                  }
                 }}
                 title="Auto-generate descriptions"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 16px', minWidth: 140, justifyContent: 'center', borderRadius: 6, border: '1px solid #e5e7eb', background: '#fff', cursor: 'pointer' }}
+                style={{ width: 220, height: 52, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '12px 16px', borderRadius: 8, border: '1px solid #e5e7eb', background: '#f3f4f6', cursor: 'pointer', fontSize: 15 }}
               >
-                <img src="/tts.png" alt="tts" style={{ width: 20, height: 20 }} />
+                Speech-to-Text Report
               </button>
 
               <button
                 onClick={() => {
-                  // AI image annotator: prepend a short 1-3 word classification to each selected image note
+                  // AI image annotator: append a short 1-3 word classification (preferably from procedure.imageNotes label)
                   setImageNotes((prev) => {
                     const next = Array.from({ length: 6 }).map((_, i) => (prev && prev[i]) ? prev[i] : '');
                     for (let i = 0; i < 6; i++) {
                       const img = images && images[i];
                       if (!img) continue; // only annotate actual images
-                      const label = generateShortLabel(img?.src, i + 1);
+
+                      // try to get a label from the procedure mapping if available
+                      let label = '';
+                      try {
+                        const map = (procedure as any)?.imageNotes as Record<string, any> | undefined;
+                        if (map) {
+                          const src = img.src || '';
+                          const parts = src.split('/');
+                          const basename = parts.pop() || src;
+                          const nameNoExt = basename.split('.')?.[0] || basename;
+                          const tries = [basename, basename.toLowerCase(), nameNoExt, nameNoExt.toLowerCase()];
+                          for (const k of tries) {
+                            if (map[k]) {
+                              const v = map[k];
+                              label = typeof v === 'string' ? v : (v.label || '');
+                              break;
+                            }
+                          }
+                          if (!label) {
+                            for (const key of Object.keys(map)) {
+                              if (!key) continue;
+                              if (src.toLowerCase().includes(key.toLowerCase())) {
+                                const v = map[key];
+                                label = typeof v === 'string' ? v : (v.label || '');
+                                break;
+                              }
+                            }
+                          }
+                        }
+                      } catch (e) {
+                        // ignore
+                      }
+
+                      // fallback to heuristic label
+                      if (!label) label = generateShortLabel(img?.src, i + 1) || '';
                       if (!label) continue;
+
                       const existing = next[i] || '';
-                      // avoid duplicate prepends
-                      if (existing.toLowerCase().startsWith(label.toLowerCase())) continue;
-                      next[i] = `${label}${existing ? ': ' + existing : ''}`;
+                      // avoid duplicate appends
+                      if (existing.toLowerCase().includes(label.toLowerCase())) continue;
+                      next[i] = existing ? `${existing} ${label}` : label;
                     }
                     return next;
                   });
                 }}
                 title="AI image annotator"
-                style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #e5e7eb', background: '#f3f4f6', cursor: 'pointer', fontSize: 13 }}
+                style={{ width: 220, height: 52, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '12px 16px', borderRadius: 8, border: '1px solid #e5e7eb', background: '#f3f4f6', cursor: 'pointer', fontSize: 15 }}
               >
                 AI image annotator
               </button>

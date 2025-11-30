@@ -1,17 +1,62 @@
 {
-  "IMG1.jpg": "Overview of terminal ileum with focal erythema adjacent to a diverticulum.",
-  "IMG2.jpg": "Close-up of suspected Meckel diverticulum showing adherent clot and mucosal defect.",
-  "IMG3.jpg": "Sigmoid polyp at 30 cm, flat morphology with mildly irregular surface; resected.",
-  "WL3.png": "Normal colonic mucosa, no active bleeding in this field.",
-  "WL4.png": "Endoscopic view showing clip placed at prior polypectomy site.",
-  "WL_55.png": "Wide-field image of colon with adequate bowel preparation and visible haustra.",
-  "WL_56.png": "Image demonstrating mucosal healing at prior polypectomy site.",
-  "WL_57.png": "Ileocecal valve visualized with normal proximal mucosa.",
-  "WL_58.png": "Localized edema near the diverticulum; no active bleeding at time of exam.",
-  "WL_59.png": "Polypectomy site with visible cautery artifact and minimal oozing controlled.",
-  "WL_65.png": "Wide-angle view of sigmoid colon with clear visualization of haustral folds.",
-  "WL_66.png": "Close-up showing clip applied to bleeding point.",
-  "WL_67.png": "Post-polypectomy inspection image showing clean resection base.",
-  "WL_68.png": "Random white-light view used for documentation.",
-  "WL_69.png": "Additional overview image for completeness of documentation."
+  "IMG1.jpg": {
+    "desc": "Overview of terminal ileum with focal erythema adjacent to a diverticulum.",
+    "label": "Bleed."
+  },
+  "IMG2.jpg": {
+    "desc": "Close-up of suspected Meckel diverticulum showing adherent clot and mucosal defect.",
+    "label": "Clipping Result."
+  },
+  "IMG3.jpg": {
+    "desc": "Sigmoid polyp at 30 cm, flat morphology with mildly irregular surface; resected.",
+    "label": "Adenoma."
+  },
+  "WL3.png": {
+    "desc": "Normal colonic mucosa, no active bleeding in this field.",
+    "label": "Normal."
+  },
+  "WL4.png": {
+    "desc": "Endoscopic view showing clip placed at prior polypectomy site.",
+    "label": "Hyperplasic lesion."
+  },
+  "WL_55.png": {
+    "desc": "Wide-field image of colon with adequate bowel preparation and visible haustra.",
+    "label": "Overview."
+  },
+  "WL_56.png": {
+    "desc": "Image demonstrating mucosal healing at prior polypectomy site.",
+    "label": "Adenoma."
+  },
+  "WL_57.png": {
+    "desc": "Ileocecal valve visualized with normal proximal mucosa.",
+    "label": "Ileocecal valve."
+  },
+  "WL_58.png": {
+    "desc": "Localized edema near the diverticulum; no active bleeding at time of exam.",
+    "label": "Edema."
+  },
+  "WL_59.png": {
+    "desc": "Polypectomy site with visible cautery artifact and minimal oozing controlled.",
+    "label": "Polypectomy site."
+  },
+  "WL_65.png": {
+    "desc": "Wide-angle view of sigmoid colon with clear visualization of haustral folds.",
+    "label": "Overview."
+  },
+  "WL_66.png": {
+    "desc": "Close-up showing clip applied to bleeding point.",
+    "label": "Adenoma."
+  },
+  "WL_67.png": {
+    "desc": "Post-polypectomy inspection image showing clean resection base.",
+    "label": "Post-polypectomy."
+  },
+  "WL_68.png": {
+    "desc": "Random white-light view used for documentation.",
+    "label": "Overview."
+  },
+  "WL_69.png": {
+    "desc": "Additional overview image for completeness of documentation.",
+    "label": "Overview."
+  }
 }
